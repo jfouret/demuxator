@@ -11,6 +11,7 @@ TESTS_DIR=tests
 TESTS_SRC_DIR=$(TESTS_DIR)/src
 TESTS_BUILD_DIR=$(TESTS_DIR)/build
 TESTS_BIN_DIR=$(TESTS_DIR)/bin
+TESTS_COV_DIR=$(TESTS_DIR)/coverage_report
 
 SOURCES=$(wildcard $(SRC_DIR)/*.cpp)
 OBJECTS=$(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SOURCES))
@@ -47,15 +48,16 @@ $(TESTS_BUILD_DIR)/%.o: $(TESTS_SRC_DIR)/%.cpp
 
 test: $(TESTS_EXECUTABLES)
 	for test in $^ ; do \
-		(cd $(TESTS_BIN_DIR) && GCOV_PREFIX=$(TESTS_BUILD_DIR) ./`basename $$test`) ; \
+		(cd $(TESTS_BIN_DIR) && ./`basename $$test`) ; \
 	done
 
 clean:
-	rm -rf $(BUILD_DIR) $(EXECUTABLE) $(TESTS_BUILD_DIR) $(TESTS_BIN_DIR) $(COV_DIR)
+	rm -rf $(BUILD_DIR) $(EXECUTABLE) $(TESTS_BUILD_DIR) $(TESTS_BIN_DIR) $(TESTS_COV_DIR) 
 
 coverage_report: test
 	mkdir -p $(TESTS_DIR)/coverage_report
-	lcov --capture --directory $(TEST_BUILD_DIR) --output-file $(TESTS_DIR)/coverage_report/coverage.info
-	genhtml $(TESTS_DIR)/coverage_report/coverage.info --output-directory $(TESTS_DIR)/coverage_report
+	lcov --capture --directory $(TESTS_BUILD_DIR) --output-file $(TESTS_COV_DIR)/coverage.info
+	lcov --extract $(TESTS_COV_DIR)/coverage.info "$(CURDIR)/$(SRC_DIR)/*" --output-file $(TESTS_COV_DIR)/filtered_coverage.info
+	genhtml $(TESTS_COV_DIR)/filtered_coverage.info --output-directory $(TESTS_COV_DIR)
 
 .PHONY: all test clean coverage_report

@@ -1,0 +1,5 @@
+tests/build
+tests/bin
+tests/coverage_report
+demuxator
+build

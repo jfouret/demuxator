@@ -1,6 +1,6 @@
 #include "select_barcodes_above_threshold.h"
 
-std::unordered_set<std::string> select_barcodes_above_threshold(gzFile &read2_file, double threshold, int sample_size) {
+std::unordered_set<std::string> select_barcodes_above_threshold(gzFile &read2_file, int bc_start, int bc_length, double threshold, int sample_size) {
     std::unordered_map<std::string, int> barcode_counts;
     int total_count = 0;
 
@@ -14,7 +14,7 @@ std::unordered_set<std::string> select_barcodes_above_threshold(gzFile &read2_fi
             break;
         }
 
-        std::string barcode = read2_sequence.substr(10, 12);
+        std::string barcode = read2_sequence.substr(bc_start, bc_length);
         barcode_counts[barcode]++;
         total_count++;
     }

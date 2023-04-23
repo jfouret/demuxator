@@ -9,8 +9,11 @@
 #include "read_gz_line.h"
 #include "load_expected_barcodes.h"
 #include "select_barcodes_above_threshold.h"
+#include "demuxator.h"
 
 constexpr int SUBSET_SIZE = 10000;
+constexpr int BC_START = 10;
+constexpr int BC_END = 22;
 
 int main(int argc, char *argv[]) {
     int opt;
@@ -57,7 +60,8 @@ int main(int argc, char *argv[]) {
     if (!expected_barcodes_path.empty()) {
         allowed_barcodes = load_expected_barcodes(expected_barcodes_path);
     }
-    std::unordered_set<std::string> barcodes_above_threshold = select_barcodes_above_threshold(read2_file, threshold, SUBSET_SIZE);
+    
+    std::unordered_set<std::string> barcodes_above_threshold = select_barcodes_above_threshold(read2_file, BC_START, BC_END, threshold, SUBSET_SIZE);
     // If both expected barcodes and barcodes above threshold are provided, take the union of both sets
     if (!allowed_barcodes.empty()) {
         for (const auto &barcode : barcodes_above_threshold) {
@@ -67,79 +71,7 @@ int main(int argc, char *argv[]) {
         allowed_barcodes = barcodes_above_threshold;
     }
 
-    // Key: barcode, Value: a pair of output files for R1 and R2
-    std::unordered_map<std::string, std::pair<gzFile, gzFile>> output_files;
-
-    while (true) {
-        // Read R1 and R2 lines from the input files
-        std::string read1_identifier = read_gz_line(read1_file);
-        std::string read1_sequence = read_gz_line(read1_file);
-        std::string read1_plus_line = read_gz_line(read1_file);
-        std::string read1_quality = read_gz_line(read1_file);
-
-        std::string read2_identifier = read_gz_line(read2_file);
-        std::string read2_sequence = read_gz_line(read2_file);
-        std::string read2_plus_line = read_gz_line(read2_file);
-        std::string read2_quality = read_gz_line(read2_file);
-
-        // Break the loop if either R1 or R2 reaches the end of the file
-        if (read1_identifier.empty() || read2_identifier.empty()) {
-            break;
-        }
-
-        // Extract the barcode from the R2 read
-        std::string barcode = read2_sequence.substr(10, 12);
-
-        // Skip the read if the barcode is not in the allowed_barcodes set
-        if (allowed_barcodes.find(barcode) == allowed_barcodes.end()) {
-            continue;
-        }
-
-        // Check if the output files for this barcode have been created
-        auto it = output_files.find(barcode);
-        if (it == output_files.end()) {
-            // If not, create the output files and add them to the output_files map
-            std::string output_file_name_r1 = barcode + "_R1.fastq.gz";
-            std::string output_file_name_r2 = barcode + "_R2.fastq.gz";
-            gzFile output_file_r1 = gzopen(output_file_name_r1.c_str(), "wt");
-            gzFile output_file_r2 = gzopen(output_file_name_r2.c_str(), "wt");
-            assert(output_file_r1);
-            assert(output_file_r2);
-            output_files[barcode] = {output_file_r1, output_file_r2};
-            it = output_files.find(barcode);
-        }
-
-        // Write the R1 and R2 reads to their respective output files
-        gzFile output_file_r1 = it->second.first;
-        gzFile output_file_r2 = it->second.second;
-        gzputs(output_file_r1, read1_identifier.c_str());
-        gzputc(output_file_r1, '\n');
-        gzputs(output_file_r1, read1_sequence.c_str());
-        gzputc(output_file_r1, '\n');
-        gzputs(output_file_r1, read1_plus_line.c_str());
-        gzputc(output_file_r1, '\n');
-        gzputs(output_file_r1, read1_quality.c_str());
-        gzputc(output_file_r1, '\n');
-
-        gzputs(output_file_r2, read2_identifier.c_str());
-        gzputc(output_file_r2, '\n');
-        gzputs(output_file_r2, read2_sequence.c_str());
-        gzputc(output_file_r2, '\n');
-        gzputs(output_file_r2, read2_plus_line.c_str());
-        gzputc(output_file_r2, '\n');
-        gzputs(output_file_r2, read2_quality.c_str());
-        gzputc(output_file_r2, '\n');
-    }
-
-    // Close all output files
-    for (auto &entry : output_files) {
-        gzclose(entry.second.first);
-        gzclose(entry.second.second);
-    }
-
-    // Close input files
-    gzclose(read1_file);
-    gzclose(read2_file);
+    demuxator(read1_file, read2_file, allowed_barcodes, BC_START, BC_END);
 
     return 0;
 }

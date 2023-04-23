@@ -3,3 +3,4 @@ tests/bin
 tests/coverage_report
 demuxator
 build
+.vscode

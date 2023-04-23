@@ -33,12 +33,12 @@ protected:
 
       for (int i = 0; i < n_reads; i++) {
         test_data << "@" << i << std::endl;
-        for (int j = 0 ; j < bc_start; j++) {
+        for (int j = 1 ; j < bc_start; j++) {
           test_data << bases[udis(gen)];
         }
         idx = bdis(gen);
         test_data << barcodes[idx];
-        for (int j = bc_start + barcodes[idx].size() ; j < read_size; j++) {
+        for (int j = bc_start + barcodes[idx].size() ; j <= read_size; j++) {
           test_data << bases[udis(gen)];
         }
         test_data << std::endl << "+" << std::endl << s_quals << std::endl;
@@ -51,7 +51,7 @@ protected:
     };
 
     void TearDown() override {
-      remove("test1_read2.fastq.gz");
+      // remove("test1_read2.fastq.gz");
       remove("test2_read2.fastq.gz");
     }
 };

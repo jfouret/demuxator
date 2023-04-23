@@ -13,7 +13,7 @@
 
 constexpr int SUBSET_SIZE = 10000;
 constexpr int BC_START = 10;
-constexpr int BC_END = 22;
+constexpr int BC_LENGTH = 12;
 
 int main(int argc, char *argv[]) {
     int opt;
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
         allowed_barcodes = load_expected_barcodes(expected_barcodes_path);
     }
     
-    std::unordered_set<std::string> barcodes_above_threshold = select_barcodes_above_threshold(read2_file, BC_START, BC_END, threshold, SUBSET_SIZE);
+    std::unordered_set<std::string> barcodes_above_threshold = select_barcodes_above_threshold(read2_file, BC_START, BC_LENGTH, threshold, SUBSET_SIZE);
     // If both expected barcodes and barcodes above threshold are provided, take the union of both sets
     if (!allowed_barcodes.empty()) {
         for (const auto &barcode : barcodes_above_threshold) {
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
         allowed_barcodes = barcodes_above_threshold;
     }
 
-    demuxator(read1_file, read2_file, allowed_barcodes, BC_START, BC_END);
+    demuxator(read1_file, read2_file, allowed_barcodes, BC_START, BC_LENGTH, true);
 
     return 0;
 }

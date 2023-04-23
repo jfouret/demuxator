@@ -10,3 +10,10 @@ std::string read_gz_line(gzFile &file) {
     return result;
 }
 
+void skip_gz_line(gzFile &file) {
+  int ch = gzgetc(file);
+  while (ch != -1 && ch != '\n') {
+    ch = gzgetc(file);
+  }
+}
+

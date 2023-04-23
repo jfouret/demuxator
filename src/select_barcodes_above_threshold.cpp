@@ -14,7 +14,7 @@ std::unordered_set<std::string> select_barcodes_above_threshold(gzFile &read2_fi
             break;
         }
 
-        std::string barcode = read2_sequence.substr(bc_start, bc_length);
+        std::string barcode = read2_sequence.substr(bc_start - 1, bc_length);
         barcode_counts[barcode]++;
         total_count++;
     }

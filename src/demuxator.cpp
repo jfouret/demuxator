@@ -1,16 +1,14 @@
 #include "demuxator.h"
 
-void demuxator(gzFile &read1_file, gzFile &read2_file, std::unordered_set<std::string> allowed_barcodes, int bc_start, int bc_end) {
+void demuxator(gzFile &read1_file, gzFile &read2_file,
+    std::unordered_set<std::string> allowed_barcodes,
+    int bc_start, int bc_length, bool remove_barcodes) {
 
     // Key: barcode, Value: a pair of output files for R1 and R2
     std::unordered_map<std::string, std::pair<gzFile, gzFile>> output_files;
 
     while (true) {
         // Read R1 and R2 lines from the input files
-        std::string read1_identifier = read_gz_line(read1_file);
-        std::string read1_sequence = read_gz_line(read1_file);
-        std::string read1_plus_line = read_gz_line(read1_file);
-        std::string read1_quality = read_gz_line(read1_file);
 
         std::string read2_identifier = read_gz_line(read2_file);
         std::string read2_sequence = read_gz_line(read2_file);
@@ -18,17 +16,32 @@ void demuxator(gzFile &read1_file, gzFile &read2_file, std::unordered_set<std::s
         std::string read2_quality = read_gz_line(read2_file);
 
         // Break the loop if either R1 or R2 reaches the end of the file
-        if (read1_identifier.empty() || read2_identifier.empty()) {
+        if (read2_identifier.empty()) {
             break;
         }
 
         // Extract the barcode from the R2 read
-        std::string barcode = read2_sequence.substr(bc_start, bc_end);
+        std::string barcode = read2_sequence.substr(bc_start - 1, bc_length);
 
         // Skip the read if the barcode is not in the allowed_barcodes set
         if (allowed_barcodes.find(barcode) == allowed_barcodes.end()) {
+            for (int i = 0 ; i < 4; i++) {
+                read_gz_line(read1_file);
+            }
             continue;
         }
+
+        if (remove_barcodes) {
+            int read2_size = read2_sequence.size();
+            int read2_start = bc_start - 1 + bc_length;
+            read2_sequence = read2_sequence.substr(read2_start, read2_size);
+            read2_quality = read2_quality.substr(read2_start, read2_size);
+        }
+
+        std::string read1_identifier = read_gz_line(read1_file);
+        std::string read1_sequence = read_gz_line(read1_file);
+        std::string read1_plus_line = read_gz_line(read1_file);
+        std::string read1_quality = read_gz_line(read1_file);
 
         // Check if the output files for this barcode have been created
         auto it = output_files.find(barcode);

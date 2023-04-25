@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
                 std::cerr << "  --bc-length: Length of barcodes in read 2 (default: 12)" << std::endl;
                 std::cerr << "  --remove-barcode: Remove barcode from output reads (default: false)" << std::endl;
                 std::cerr << "  -h, --help: Show this help message" << std::endl;
-                std::cerr << "Output files are written in the current directory using the barcode sequence and prefix name." << std::endl;
+                std::cerr << "Output files are written in the current directory using the barcode sequence as prefix in filenames." << std::endl;
                 return (opt == 'h') ? 0 : 1;
         }
     }

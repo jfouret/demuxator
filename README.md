@@ -15,7 +15,7 @@ Usage: ./demuxator [-e|--expected-barcodes expected_barcodes.txt] [-t|--threshol
   --bc-length: Length of barcodes in read 2 (default: 12)
   --remove-barcode: Remove barcode from output reads (default: false)
   -h, --help: Show this help message
-Output files are written in the current directory using the barcode sequence and prefix name.
+Output files are written in the current directory using the barcode sequence as prefix in filenames.
 ```
 
 ## Build

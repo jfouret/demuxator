@@ -1,4 +1,5 @@
 #include "select_barcodes_above_threshold.h"
+#include "extract_barcode.h"
 
 std::unordered_set<std::string> select_barcodes_above_threshold(gzFile &read2_file, int bc_start, int bc_length, double threshold, int sample_size) {
     std::unordered_map<std::string, int> barcode_counts;
@@ -14,9 +15,11 @@ std::unordered_set<std::string> select_barcodes_above_threshold(gzFile &read2_fi
             break;
         }
 
-        std::string barcode = read2_sequence.substr(bc_start - 1, bc_length);
-        barcode_counts[barcode]++;
-        total_count++;
+        std::string barcode = extract_barcode(read2_sequence, bc_start, bc_length);
+        if (! barcode.empty()) {
+            barcode_counts[barcode]++;
+            total_count++;
+        } 
     }
 
     int threshold_count = static_cast<int>(threshold * total_count);

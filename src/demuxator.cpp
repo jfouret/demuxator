@@ -1,4 +1,5 @@
 #include "demuxator.h"
+#include "extract_barcode.h"
 
 void demuxator(gzFile &read1_file, gzFile &read2_file,
     std::unordered_set<std::string> allowed_barcodes,
@@ -21,7 +22,10 @@ void demuxator(gzFile &read1_file, gzFile &read2_file,
         }
 
         // Extract the barcode from the R2 read
-        std::string barcode = read2_sequence.substr(bc_start - 1, bc_length);
+        std::string barcode = extract_barcode(read2_sequence, bc_start, bc_length);
+        if (barcode.empty()) {
+            continue;
+        } 
 
         // Skip the read if the barcode is not in the allowed_barcodes set
         if (allowed_barcodes.find(barcode) == allowed_barcodes.end()) {

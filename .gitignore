@@ -1,5 +1,6 @@
 tests/build
 tests/bin
+tests/*fastq*
 tests/coverage_report
 demuxator
 build

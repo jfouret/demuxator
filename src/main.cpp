@@ -10,9 +10,14 @@
 #include "select_barcodes_above_threshold.h"
 #include "demuxator.h"
 
+bool file_exists(const std::string &path) {
+    struct stat buffer;
+    return (stat(path.c_str(), &buffer) == 0);
+}
+
 int main(int argc, char *argv[]) {
     int opt;
-    std::string expected_barcodes_path;
+    std::string expected_barcodes_path = "";
     double threshold = 0.01;
     int subset_size = 10000;
     int bc_start = 10;
@@ -22,9 +27,9 @@ int main(int argc, char *argv[]) {
     static struct option long_options[] = {
         {"expected-barcodes", required_argument, 0, 'e'},
         {"threshold", required_argument, 0, 't'},
-        {"subset-size", optional_argument, 0, 's'},
-        {"bc-start", optional_argument, 0, 'b'},
-        {"bc-length", optional_argument, 0, 'l'},
+        {"subset-size", required_argument, 0, 's'},
+        {"bc-start", required_argument, 0, 'b'},
+        {"bc-length", required_argument, 0, 'l'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
@@ -64,6 +69,7 @@ int main(int argc, char *argv[]) {
                 return (opt == 'h') ? 0 : 1;
         }
     }
+    
 
     if (optind + 2 > argc) {
         std::cerr << "Usage: " << argv[0] << " [-e|--expected-barcodes expected_barcodes.txt] [-t|--threshold threshold] [--subset-size subset_size] [--bc-start bc_start] [--bc-length bc_length] [--remove-barcode] read1.fastq.gz read2.fastq.gz" << std::endl;
@@ -81,8 +87,14 @@ int main(int argc, char *argv[]) {
     }
 
     std::unordered_set<std::string> allowed_barcodes;
+
+
     if (!expected_barcodes_path.empty()) {
-        allowed_barcodes = load_expected_barcodes(expected_barcodes_path);
+        if (file_exists(expected_barcodes_path)) {
+            allowed_barcodes = load_expected_barcodes(expected_barcodes_path);
+        } else {
+            std::cerr << "Warning: Expected barcodes file '" << expected_barcodes_path << "' not found. Continuing without expected barcodes." << std::endl;
+        }
     }
 
     std::unordered_set<std::string> barcodes_above_threshold = select_barcodes_above_threshold(read2_file, bc_start, bc_length, threshold, subset_size);

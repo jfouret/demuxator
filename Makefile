@@ -46,13 +46,18 @@ $(TESTS_BUILD_DIR)/%.o: $(TESTS_SRC_DIR)/%.cpp
 	mkdir -p $(TESTS_BUILD_DIR)
 	GCOV_PREFIX=$(TESTS_BUILD_DIR) $(CXX) $(TESTS_CXXFLAGS) $(CXXFLAGS) -c $< -o $@
 
-test: $(TESTS_EXECUTABLES)
+test: unit_test e2e_test
+
+unit_test: $(TESTS_EXECUTABLES)
 	for test in $^ ; do \
 		(cd $(TESTS_BIN_DIR) && ./`basename $$test`) ; \
 	done
 
+e2e_test: $(EXECUTABLE)
+	bash tests/make_test.sh
+
 clean:
-	rm -rf $(BUILD_DIR) $(EXECUTABLE) $(TESTS_BUILD_DIR) $(TESTS_BIN_DIR) $(TESTS_COV_DIR) 
+	rm -rf $(BUILD_DIR) $(EXECUTABLE) $(TESTS_BUILD_DIR) $(TESTS_BIN_DIR) $(TESTS_COV_DIR) $(TESTS_DIR)/*fastq*
 
 coverage_report: test
 	mkdir -p $(TESTS_DIR)/coverage_report
@@ -60,4 +65,4 @@ coverage_report: test
 	lcov --extract $(TESTS_COV_DIR)/coverage.info "$(CURDIR)/$(SRC_DIR)/*" --output-file $(TESTS_COV_DIR)/filtered_coverage.info
 	genhtml $(TESTS_COV_DIR)/filtered_coverage.info --output-directory $(TESTS_COV_DIR)
 
-.PHONY: all test clean coverage_report
+.PHONY: all test e2e_test unit_test clean coverage_report

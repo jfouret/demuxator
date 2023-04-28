@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
         {"subset-size", required_argument, 0, 's'},
         {"bc-start", required_argument, 0, 'b'},
         {"bc-length", required_argument, 0, 'l'},
+        {"remove-barcode", no_argument, 0, 'r'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };

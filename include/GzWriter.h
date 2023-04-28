@@ -15,6 +15,7 @@ public:
 
 private:
     static const size_t BUFFER_SIZE = 100 * 1024 * 1024; // 100M buffer size
+    static const int COMPRESSION_LEVEL = 4;
     boost::iostreams::file_sink file;
     std::vector<char> buffer; // Create a buffer of size 100M
     boost::iostreams::filtering_ostream out;

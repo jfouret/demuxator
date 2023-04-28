@@ -29,6 +29,9 @@ Output files are written in the current directory using the barcode sequence as 
 ### To build the program
 
 - zlib
+- libboost-dev
+- libboost-iostreams-dev
+- libboost-filesystem-dev
 - c++ Compiler
 - c++ standard libraries
 

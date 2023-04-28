@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <zlib.h>
-#include "read_gz_line.h"
+#include "GzReader.h"
 #include "load_expected_barcodes.h"
 #include "select_barcodes_above_threshold.h"
 #include "demuxator.h"
@@ -79,12 +79,8 @@ int main(int argc, char *argv[]) {
     const char *read1_path = argv[optind];
     const char *read2_path = argv[optind + 1];
 
-    gzFile read1_file = gzopen(read1_path, "rt");
-    gzFile read2_file = gzopen(read2_path, "rt");
-    if (!read1_file || !read2_file) {
-        std::cerr << "Error: Cannot open input files." << std::endl;
-        return 1;
-    }
+    GzReader read1_file(read1_path);
+    GzReader read2_file(read2_path);
 
     std::unordered_set<std::string> allowed_barcodes;
 

@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "../include/demuxator.h"
+#include "../include/GzReader.h"
 #include <unordered_set>
 #include <fstream>
 #include <iostream>
@@ -42,24 +43,24 @@ void check_output_file_content(const std::string& barcode) {
     std::string output_file_name_r1 = barcode + "_R1.fastq.gz";
     std::string output_file_name_r2 = barcode + "_R2.fastq.gz";
 
-    gzFile output_file_r1 = gzopen(output_file_name_r1.c_str(), "rb");
-    gzFile output_file_r2 = gzopen(output_file_name_r2.c_str(), "rb");
+    GzReader output_file_r1 (output_file_name_r1);
+    GzReader output_file_r2 (output_file_name_r2);
 
     std::string expected_read1_seq = "NNN" + barcode + "NNN";
     std::string expected_read2_seq = "NN" + barcode + "NN";
 
-    skip_gz_line(output_file_r1);  // Skip line
-    std::string read1_sequence = read_gz_line(output_file_r1);
-    read_gz_line(output_file_r1);  // Skip line
-    std::string read1_quality = read_gz_line(output_file_r1);
+    output_file_r1.skip_line();  // Skip line
+    std::string read1_sequence = output_file_r1.read_line();
+    output_file_r1.skip_line();  // Skip line
+    std::string read1_quality = output_file_r1.read_line();
 
-    skip_gz_line(output_file_r2);  // Skip line
-    std::string read2_sequence = read_gz_line(output_file_r2);
-    read_gz_line(output_file_r2);  // Skip line
-    std::string read2_quality = read_gz_line(output_file_r2);
+    output_file_r2.skip_line();  // Skip line
+    std::string read2_sequence = output_file_r2.read_line();
+    output_file_r2.skip_line();  // Skip line
+    std::string read2_quality = output_file_r2.read_line();
 
-    gzclose(output_file_r1);
-    gzclose(output_file_r2);
+    output_file_r1.close();
+    output_file_r2.close();
 
     EXPECT_EQ(expected_read1_seq, read1_sequence);
     EXPECT_EQ(expected_read2_seq, read2_sequence);
@@ -72,8 +73,8 @@ TEST(DemuxatorTest, SplitInputFilesBasedOnAllowedBarcodes) {
     // Prepare input files (R1 and R2)
     write_test_files({"ATCGAA", "ATCGTT", "ATCGCC"});
 
-    gzFile read1_file = gzopen("test_R1.fastq.gz", "rb");
-    gzFile read2_file = gzopen("test_R2.fastq.gz", "rb");
+    GzReader read1_file ("test_R1.fastq.gz");
+    GzReader read2_file ("test_R2.fastq.gz");
     std::unordered_set<std::string> allowed_barcodes = {"ATCGAA", "ATCGTT"};
     demuxator(read1_file, read2_file, allowed_barcodes, 7, 6, true);
 

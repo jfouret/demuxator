@@ -1,9 +1,9 @@
 CXX=g++
 
-CXXFLAGS = -Wall -Iinclude
-LDFLAGS = -lz
+CXXFLAGS = -Wall -Iinclude -Ofast
+LDFLAGS = -lz -lboost_iostreams -lboost_filesystem
 TESTS_CXXFLAGS = -fprofile-arcs -ftest-coverage
-TESTS_LDFLAGS = -lgtest -lpthread -lz
+TESTS_LDFLAGS = -lgtest -lpthread
 
 SRC_DIR=src
 BUILD_DIR=build
@@ -36,7 +36,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 $(TESTS_BIN_DIR)/%: $(TESTS_BUILD_DIR)/%.o $(TEST_OBJECTS)
 	mkdir -p $(TESTS_BIN_DIR)
-	GCOV_PREFIX=$(TESTS_BUILD_DIR) $(CXX) $(CXXFLAGS) $(TESTS_CXXFLAGS) $^ -o $@ $(TESTS_LDFLAGS)
+	GCOV_PREFIX=$(TESTS_BUILD_DIR) $(CXX) $(CXXFLAGS) $(TESTS_CXXFLAGS) $^ -o $@ $(LDFLAGS) $(TESTS_LDFLAGS)
 
 $(TESTS_BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	mkdir -p $(TESTS_BUILD_DIR)

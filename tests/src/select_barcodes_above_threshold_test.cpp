@@ -61,11 +61,9 @@ void test_select_barcodes_above_threshold(const std::string& file_path,
   std::unordered_set<std::string> expected,
   std::unordered_set<std::string> unexpected) {
 
-  gzFile file = gzopen(file_path.c_str(), "rb");
+  GzReader file (file_path);
 
   std::unordered_set<std::string> selected_barcodes = select_barcodes_above_threshold(file, bc_start, bc_length, threshold, 5000);
-
-  gzclose(file);
 
   for (const auto& barcode : expected) {
       EXPECT_TRUE(selected_barcodes.find(barcode) != selected_barcodes.end()) << "Expected barcode " << barcode << " not found.";
@@ -74,6 +72,13 @@ void test_select_barcodes_above_threshold(const std::string& file_path,
   for (const auto& barcode : unexpected) {
       EXPECT_TRUE(selected_barcodes.find(barcode) == selected_barcodes.end()) << "Unexpected barcode " << barcode << " found.";
   }
+
+  std::string first_line = file.read_line();
+
+  EXPECT_TRUE(first_line == "@0") << "File not rewind: " << first_line;
+
+  file.close();
+
 }
 
 TEST_F(SelectBarcodesAboveThresholdTest, SelectBarcodesAboveThresholdTest) {

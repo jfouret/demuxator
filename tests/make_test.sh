@@ -22,7 +22,3 @@ gzip R1.fastq
 gzip R2.fastq
 
 ../demuxator --bc-start 3 --bc-length 2 R1.fastq.gz R2.fastq.gz
-
-
-
-rm *fastq*

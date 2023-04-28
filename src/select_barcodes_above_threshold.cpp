@@ -1,21 +1,22 @@
 #include "select_barcodes_above_threshold.h"
 #include "extract_barcode.h"
+#include "GzReader.h"
 
-std::unordered_set<std::string> select_barcodes_above_threshold(gzFile &read2_file, int bc_start, int bc_length, double threshold, int sample_size) {
+std::unordered_set<std::string> select_barcodes_above_threshold(GzReader &read_file, int bc_start, int bc_length, double threshold, int sample_size) {
     std::unordered_map<std::string, int> barcode_counts;
     int total_count = 0;
 
     for (int i = 0; i < sample_size; ++i) {
-        std::string read2_identifier = read_gz_line(read2_file);
-        std::string read2_sequence = read_gz_line(read2_file);
-        std::string read2_plus_line = read_gz_line(read2_file);
-        std::string read2_quality = read_gz_line(read2_file);
+        read_file.skip_line();
+        std::string read_sequence = read_file.read_line();
+        read_file.skip_line();
+        read_file.skip_line();
 
-        if (read2_identifier.empty()) {
+        if (read_sequence.empty()) {
             break;
         }
 
-        std::string barcode = extract_barcode(read2_sequence, bc_start, bc_length);
+        std::string barcode = extract_barcode(read_sequence, bc_start, bc_length);
         if (! barcode.empty()) {
             barcode_counts[barcode]++;
             total_count++;
@@ -30,6 +31,7 @@ std::unordered_set<std::string> select_barcodes_above_threshold(gzFile &read2_fi
         }
     }
 
-    gzrewind(read2_file);
+    read_file.rewind();
+
     return selected_barcodes;
 }

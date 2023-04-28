@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/device/file.hpp>
@@ -16,8 +17,9 @@ public:
     void rewind();
 
 private:
+    static const size_t BUFFER_SIZE = 100 * 1024 * 1024; // 100M buffer size
     std::string file_path; // Store the file path as a member variable
-    boost::iostreams::filtering_istream in;
     boost::iostreams::file_source file;
+    std::vector<char> buffer; // Create a buffer of size 100M
+    boost::iostreams::filtering_istream in;
 };
-

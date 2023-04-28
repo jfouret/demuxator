@@ -1,8 +1,9 @@
 #include "GzReader.h"
 
-GzReader::GzReader(const std::string& in_path) : file_path(boost::filesystem::absolute(in_path).string()), file(in_path) {
+GzReader::GzReader(const std::string& in_path) : file_path(boost::filesystem::absolute(in_path).string()), file(in_path), buffer(BUFFER_SIZE) {
     in.push(boost::iostreams::gzip_decompressor());
     in.push(file);
+    in.rdbuf()->pubsetbuf(buffer.data(), BUFFER_SIZE); // Set the buffer for the input stream
 }
 
 GzReader::~GzReader() {
@@ -34,4 +35,5 @@ void GzReader::rewind() {
     file.open(file_path);
     in.push(boost::iostreams::gzip_decompressor());
     in.push(file);
+    in.rdbuf()->pubsetbuf(buffer.data(), BUFFER_SIZE); // Set the buffer for the input stream
 }

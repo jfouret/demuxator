@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/device/file.hpp>
@@ -13,6 +14,8 @@ public:
     void close();
 
 private:
-    boost::iostreams::filtering_ostream out;
+    static const size_t BUFFER_SIZE = 100 * 1024 * 1024; // 100M buffer size
     boost::iostreams::file_sink file;
+    std::vector<char> buffer; // Create a buffer of size 100M
+    boost::iostreams::filtering_ostream out;
 };

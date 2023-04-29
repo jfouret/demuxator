@@ -12,8 +12,8 @@ GzReader::~GzReader() {
 }
 
 std::string GzReader::read_line() {
-    std::string line;
-    std::getline(in, line);
+    in.getline(line_buffer, sizeof(line_buffer));
+    std::string line(line_buffer);
     return line;
 }
 
